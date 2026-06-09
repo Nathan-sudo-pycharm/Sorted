@@ -55,7 +55,7 @@ http://127.0.0.1:8000/webhook?hub.mode=subscribe&hub.challenge=1234&hub.verify_t
 ```
 It returned `1234` — exactly what Meta expects.
 
-<img src="assets/thunder-client-200.png" alt="Thunder Client 200 OK" width="600"/>
+<img src="../assets/thunder-client-200.png" alt="Thunder Client 200 OK" width="600"/>
 
 I then set up ngrok to expose the local server publicly and confirmed the same test worked over the internet. That was the end of Day 1.
 
@@ -91,7 +91,7 @@ I created a free Supabase project (Mumbai region) and ran SQL to create two tabl
 
 Both tables have RLS enabled.
 
-<img src="assets/supabase-schema.png" alt="Supabase schema visualizer showing customers and messages tables" width="600"/>
+<img src="../assets/supabase-schema.png" alt="Supabase schema visualizer showing customers and messages tables" width="600"/>
 
 One issue here: when I pasted the Supabase project URL into `.env`, I accidentally included the `/rest/v1/` path suffix. The error I got was:
 
@@ -132,11 +132,11 @@ Sending a mocked WhatsApp message via Thunder Client now produces this in the te
 ✅ Saved to database!
 ```
 
-<img src="assets/terminal-saved.png" alt="Terminal showing saved message output" width="600"/>
+<img src="../assets/terminal-saved.png" alt="Terminal showing saved message output" width="600"/>
 
 And the data is visible in Supabase — a customer row with a UUID and phone number, and a messages row linked to it.
 
-<img src="assets/supabase-customers.png" alt="Supabase customers table with first real row" width="600"/>
+<img src="../assets/supabase-customers.png" alt="Supabase customers table with first real row" width="600"/>
 
 ---
 
