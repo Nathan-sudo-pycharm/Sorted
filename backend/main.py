@@ -23,5 +23,14 @@ def verify(
 @app.post("/webhook")
 async def receive(request: Request):
     body = await request.json()
-    print("Incoming message:", body)
+    
+    try:
+        message = body["entry"][0]["changes"][0]["value"]["messages"][0]
+        phone = message["from"]
+        text = message["text"]["body"]
+        print(f"📱 From: {phone}")
+        print(f"💬 Message: {text}")
+    except (KeyError, IndexError):
+        print("Not a message event, ignoring")
+    
     return {"status": "ok"}
