@@ -50,7 +50,19 @@ async def receive(request: Request):
         print(f"🧠 Parsed: {parsed}")
 
         if parsed.get("is_order"):
-            print(f"✅ Order detected!")
+            # Save order to Supabase
+            order = supabase.table("orders").insert({
+                "customer_id": customer_id,
+                "raw_message": text,
+                "items": parsed.get("items", []),
+                "delivery_date": parsed.get("delivery_date"),
+                "is_price_query": parsed.get("is_price_query", False),
+                "suggested_reply": parsed.get("suggested_reply"),
+                "status": "new"
+            }).execute()
+
+            order_id = order.data[0]["id"]
+            print(f"✅ Order saved! ID: {order_id}")
             print(f"📦 Items: {parsed.get('items')}")
             print(f"📅 Delivery: {parsed.get('delivery_date')}")
             print(f"💬 Suggested reply: {parsed.get('suggested_reply')}")
