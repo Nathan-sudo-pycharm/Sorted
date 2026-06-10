@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request, Query
 from dotenv import load_dotenv
 from db.client import supabase
+from services.parser import parse_order
 import os
 
 load_dotenv()
@@ -30,12 +31,11 @@ async def receive(request: Request):
         print(f"📱 From: {phone}")
         print(f"💬 Message: {text}")
 
-        # Upsert customer (create if not exists)
+        # Upsert customer
         customer = supabase.table("customers").upsert(
             {"phone_number": phone},
             on_conflict="phone_number"
         ).execute()
-
         customer_id = customer.data[0]["id"]
 
         # Save message
@@ -45,7 +45,17 @@ async def receive(request: Request):
             "body": text
         }).execute()
 
-        print(f"✅ Saved to database!")
+        # Parse the order
+        parsed = parse_order(text)
+        print(f"🧠 Parsed: {parsed}")
+
+        if parsed.get("is_order"):
+            print(f"✅ Order detected!")
+            print(f"📦 Items: {parsed.get('items')}")
+            print(f"📅 Delivery: {parsed.get('delivery_date')}")
+            print(f"💬 Suggested reply: {parsed.get('suggested_reply')}")
+        else:
+            print("ℹ️ Not an order, ignoring")
 
     except (KeyError, IndexError):
         print("Not a message event, ignoring")
