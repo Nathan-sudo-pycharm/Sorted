@@ -172,9 +172,7 @@ Save these screenshots and place them in the `assets/` folder:
 | Filename | What to screenshot |
 |---|---|
 | `parser-terminal-output.png` | Terminal showing parser output — the lines with 📱 From, 💬 Message, 🧠 Parsed, ✅ Order saved |
-| `dashboard-empty.png` | The Kanban board on first load before RLS policy was added — all columns showing "No orders" |
 | `dashboard-with-orders.png` | The Kanban board showing the 3 real orders in the New column |
-| `realtime-working.png` | The dashboard after a new order appeared without a page refresh |
 
 ---
 

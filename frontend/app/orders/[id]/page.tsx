@@ -90,7 +90,7 @@ export default function OrderDetail() {
   )
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 max-w-3xl mx-auto">
+    <main className="min-h-screen bg-slate-950 text-white p-6 max-w-full mx-auto ">
       {/* Back button */}
       <button
         onClick={() => router.push('/')}
