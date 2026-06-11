@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request, Query
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from db.client import supabase
 from services.parser import parse_order
@@ -7,6 +8,14 @@ import os
 load_dotenv()
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PATCH", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "mysecrettoken")
 
@@ -23,7 +32,6 @@ def verify(
 @app.post("/webhook")
 async def receive(request: Request):
     body = await request.json()
-
     try:
         message = body["entry"][0]["changes"][0]["value"]["messages"][0]
         phone = message["from"]
@@ -31,26 +39,22 @@ async def receive(request: Request):
         print(f"📱 From: {phone}")
         print(f"💬 Message: {text}")
 
-        # Upsert customer
         customer = supabase.table("customers").upsert(
             {"phone_number": phone},
             on_conflict="phone_number"
         ).execute()
         customer_id = customer.data[0]["id"]
 
-        # Save message
         supabase.table("messages").insert({
             "customer_id": customer_id,
             "direction": "inbound",
             "body": text
         }).execute()
 
-        # Parse the order
         parsed = parse_order(text)
         print(f"🧠 Parsed: {parsed}")
 
         if parsed.get("is_order"):
-            # Save order to Supabase
             order = supabase.table("orders").insert({
                 "customer_id": customer_id,
                 "raw_message": text,
@@ -60,12 +64,7 @@ async def receive(request: Request):
                 "suggested_reply": parsed.get("suggested_reply"),
                 "status": "new"
             }).execute()
-
-            order_id = order.data[0]["id"]
-            print(f"✅ Order saved! ID: {order_id}")
-            print(f"📦 Items: {parsed.get('items')}")
-            print(f"📅 Delivery: {parsed.get('delivery_date')}")
-            print(f"💬 Suggested reply: {parsed.get('suggested_reply')}")
+            print(f"✅ Order saved! ID: {order.data[0]['id']}")
         else:
             print("ℹ️ Not an order, ignoring")
 
@@ -73,3 +72,35 @@ async def receive(request: Request):
         print("Not a message event, ignoring")
 
     return {"status": "ok"}
+
+@app.get("/orders/{order_id}")
+def get_order(order_id: str):
+    order = supabase.table("orders").select("*").eq("id", order_id).execute()
+    if not order.data:
+        return {"error": "Order not found"}
+    order_data = order.data[0]
+    messages = supabase.table("messages").select("*").eq("customer_id", order_data["customer_id"]).order("created_at").execute()
+    return {"order": order_data, "messages": messages.data}
+
+@app.patch("/orders/{order_id}")
+async def update_order(order_id: str, request: Request):
+    body = await request.json()
+    allowed = ["status", "total_amount", "advance_paid", "notes", "confirmation_sent"]
+    update_data = {k: v for k, v in body.items() if k in allowed}
+    result = supabase.table("orders").update(update_data).eq("id", order_id).execute()
+    return {"order": result.data[0]}
+
+@app.post("/orders/{order_id}/reply")
+async def send_reply(order_id: str, request: Request):
+    body = await request.json()
+    message_text = body.get("message")
+    order = supabase.table("orders").select("customer_id").eq("id", order_id).execute()
+    customer_id = order.data[0]["customer_id"]
+    supabase.table("messages").insert({
+        "customer_id": customer_id,
+        "order_id": order_id,
+        "direction": "outbound",
+        "body": message_text
+    }).execute()
+    print(f"📤 Reply saved: {message_text}")
+    return {"status": "sent"}

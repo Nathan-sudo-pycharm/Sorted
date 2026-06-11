@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Order } from '@/lib/types'
@@ -27,6 +28,8 @@ type Props = {
 }
 
 export default function OrderCard({ order }: Props) {
+  const router = useRouter()
+
   const formattedDate = order.delivery_date
     ? new Date(order.delivery_date).toLocaleDateString('en-IN', {
         day: 'numeric',
@@ -35,7 +38,10 @@ export default function OrderCard({ order }: Props) {
     : 'No date'
 
   return (
-    <Card className="bg-slate-900 border-slate-800 hover:border-slate-600 transition-all duration-200 cursor-pointer">
+    <Card
+      onClick={() => router.push(`/orders/${order.id}`)}
+      className="bg-slate-900 border-slate-800 hover:border-slate-600 transition-all duration-200 cursor-pointer"
+    >
       <CardHeader className="pb-2 pt-4 px-4">
         <div className="flex items-center justify-between">
           <span className="text-xs text-slate-500 font-mono">
