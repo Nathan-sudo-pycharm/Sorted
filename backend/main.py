@@ -104,3 +104,45 @@ async def send_reply(order_id: str, request: Request):
     }).execute()
     print(f"📤 Reply saved: {message_text}")
     return {"status": "sent"}
+
+# --- Menu endpoints ---
+
+@app.get("/menu")
+def get_menu():
+    result = supabase.table("menu_items").select("*").order("created_at").execute()
+    return {"items": result.data}
+
+@app.post("/menu")
+async def add_menu_item(request: Request):
+    body = await request.json()
+    result = supabase.table("menu_items").insert({
+        "name": body.get("name"),
+        "aliases": body.get("aliases", []),
+        "base_price": body.get("base_price"),
+        "unit": body.get("unit", "piece"),
+        "active": True
+    }).execute()
+    return {"item": result.data[0]}
+
+@app.patch("/menu/{item_id}")
+async def update_menu_item(item_id: str, request: Request):
+    body = await request.json()
+    allowed = ["name", "aliases", "base_price", "unit", "active"]
+    update_data = {k: v for k, v in body.items() if k in allowed}
+    result = supabase.table("menu_items").update(update_data).eq("id", item_id).execute()
+    return {"item": result.data[0]}
+
+# --- Customer endpoints ---
+
+@app.get("/customers")
+def get_customers():
+    result = supabase.table("customers").select("*").order("created_at", desc=True).execute()
+    return {"customers": result.data}
+
+@app.get("/customers/{customer_id}")
+def get_customer(customer_id: str):
+    customer = supabase.table("customers").select("*").eq("id", customer_id).execute()
+    if not customer.data:
+        return {"error": "Customer not found"}
+    orders = supabase.table("orders").select("*").eq("customer_id", customer_id).order("created_at", desc=True).execute()
+    return {"customer": customer.data[0], "orders": orders.data}

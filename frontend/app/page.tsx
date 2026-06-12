@@ -1,11 +1,11 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { Order, OrderStatus } from '@/lib/types'
 import KanbanColumn from '@/components/KanbanColumn'
 import StatsBar from '@/components/StatsBar'
-
 
 const COLUMNS: { status: OrderStatus; label: string }[] = [
   { status: 'new', label: 'New' },
@@ -16,6 +16,7 @@ const COLUMNS: { status: OrderStatus; label: string }[] = [
 ]
 
 export default function Home() {
+  const router = useRouter()
   const [orders, setOrders] = useState<Order[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -39,7 +40,6 @@ export default function Home() {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'orders' },
         (payload) => {
-          console.log('🔴 Realtime event received:', payload)
           setOrders((prev) => [payload.new as Order, ...prev])
         }
       )
@@ -59,9 +59,32 @@ export default function Home() {
     <main className="min-h-screen bg-slate-950 text-white">
       {/* Header */}
       <div className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">🍰</span>
-          <h1 className="text-lg font-bold text-white">Sorted</h1>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🍰</span>
+            <h1 className="text-lg font-bold text-white  font-sora">Sorted</h1>
+          </div>
+          {/* Nav links */}
+          <nav className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/')}
+              className="text-sm text-white border-b border-white pb-0.5"
+            >
+              Orders
+            </button>
+            <button
+              onClick={() => router.push('/customers')}
+              className="text-sm text-slate-400 hover:text-white transition"
+            >
+              Customers
+            </button>
+            <button
+              onClick={() => router.push('/menu')}
+              className="text-sm text-slate-400 hover:text-white transition"
+            >
+              Menu
+            </button>
+          </nav>
         </div>
         <button className="text-slate-400 hover:text-white transition">
           🔔
@@ -70,10 +93,7 @@ export default function Home() {
 
       {/* Main content */}
       <div className="p-6">
-        {/* Stats bar */}
         <StatsBar orders={orders} />
-
-        {/* Kanban board — horizontal scroll */}
         <div className="overflow-x-auto">
           <div className="flex gap-6 min-w-max pb-4">
             {COLUMNS.map((col) => (
