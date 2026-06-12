@@ -4,13 +4,15 @@ import { useEffect, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Order, OrderStatus } from '@/lib/types'
 import KanbanColumn from '@/components/KanbanColumn'
+import StatsBar from '@/components/StatsBar'
+
 
 const COLUMNS: { status: OrderStatus; label: string }[] = [
-  { status: 'new', label: '🆕 New' },
-  { status: 'confirmed', label: '✅ Confirmed' },
-  { status: 'in_progress', label: '🍳 In Progress' },
-  { status: 'ready', label: '📦 Ready' },
-  { status: 'delivered', label: '🎉 Delivered' },
+  { status: 'new', label: 'New' },
+  { status: 'confirmed', label: 'Confirmed' },
+  { status: 'in_progress', label: 'In Progress' },
+  { status: 'ready', label: 'Ready' },
+  { status: 'delivered', label: 'Delivered' },
 ]
 
 export default function Home() {
@@ -54,22 +56,37 @@ export default function Home() {
     orders.filter((o) => o.status === status)
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Sorted 🍰</h1>
-        <p className="text-slate-400 text-sm mt-1">{orders.length} orders total</p>
+    <main className="min-h-screen bg-slate-950 text-white">
+      {/* Header */}
+      <div className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">🍰</span>
+          <h1 className="text-lg font-bold text-white">Sorted</h1>
+        </div>
+        <button className="text-slate-400 hover:text-white transition">
+          🔔
+        </button>
       </div>
 
-      <div className="grid grid-cols-5 gap-4">
-        {COLUMNS.map((col) => (
-          <KanbanColumn
-            key={col.status}
-            status={col.status}
-            label={col.label}
-            orders={getOrdersByStatus(col.status)}
-            loading={loading}
-          />
-        ))}
+      {/* Main content */}
+      <div className="p-6">
+        {/* Stats bar */}
+        <StatsBar orders={orders} />
+
+        {/* Kanban board — horizontal scroll */}
+        <div className="overflow-x-auto">
+          <div className="flex gap-6 min-w-max pb-4">
+            {COLUMNS.map((col) => (
+              <KanbanColumn
+                key={col.status}
+                status={col.status}
+                label={col.label}
+                orders={getOrdersByStatus(col.status)}
+                loading={loading}
+              />
+            ))}
+          </div>
+        </div>
       </div>
     </main>
   )

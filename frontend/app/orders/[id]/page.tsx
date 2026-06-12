@@ -3,18 +3,17 @@
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Order } from '@/lib/types'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
+import { Button } from '@/components/ui/button'
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  confirmed: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  in_progress: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  ready: 'bg-green-500/10 text-green-400 border-green-500/20',
-  delivered: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-  cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
+  new: 'bg-blue-600 text-white',
+  confirmed: 'bg-slate-600 text-white',
+  in_progress: 'bg-orange-600 text-white',
+  ready: 'bg-green-600 text-white',
+  delivered: 'bg-slate-700 text-slate-300',
+  cancelled: 'bg-red-600 text-white',
 }
 
 const STATUSES = ['new', 'confirmed', 'in_progress', 'ready', 'delivered', 'cancelled']
@@ -79,7 +78,10 @@ export default function OrderDetail() {
   if (loading) return (
     <main className="min-h-screen bg-slate-950 text-white p-6">
       <Skeleton className="h-8 w-48 bg-slate-800 mb-4" />
-      <Skeleton className="h-48 bg-slate-800 rounded-lg" />
+      <div className="grid grid-cols-2 gap-6">
+        <Skeleton className="h-96 bg-slate-800 rounded-xl" />
+        <Skeleton className="h-96 bg-slate-800 rounded-xl" />
+      </div>
     </main>
   )
 
@@ -90,118 +92,147 @@ export default function OrderDetail() {
   )
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6 max-w-full mx-auto ">
-      {/* Back button */}
-      <button
-        onClick={() => router.push('/')}
-        className="text-slate-400 text-sm mb-6 hover:text-white transition"
-      >
-        ← Back to board
-      </button>
-
-      {/* Order header */}
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-xl font-bold">Order Detail</h1>
-        <Badge variant="outline" className={statusColors[order.status]}>
+    <main className="min-h-screen bg-slate-950 text-white">
+      {/* Header */}
+      <div className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.push('/')}
+            className="text-slate-400 hover:text-white transition text-sm"
+          >
+            ← Back
+          </button>
+          <h1 className="text-base font-semibold text-white">Order Detail</h1>
+        </div>
+        <span className={`text-xs px-3 py-1 rounded-full font-medium ${statusColors[order.status]}`}>
           {order.status.replace('_', ' ')}
-        </Badge>
+        </span>
       </div>
 
-      {/* Raw message */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
-        <p className="text-xs text-slate-500 mb-1">Original message</p>
-        <p className="text-slate-200 text-sm">{order.raw_message}</p>
-      </div>
+      {/* Split layout */}
+      <div className="grid grid-cols-2 gap-0 h-[calc(100vh-57px)]">
 
-      {/* Items */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
-        <p className="text-xs text-slate-500 mb-2">Items</p>
-        {order.items?.map((item, i) => (
-          <div key={i} className="text-sm text-slate-200 mb-1">
-            <span className="font-medium">{item.qty} {item.unit} {item.name}</span>
-            {item.customisation && (
-              <span className="text-slate-500 ml-2">— {item.customisation}</span>
+        {/* LEFT — Order info */}
+        <div className="border-r border-slate-800 p-6 overflow-y-auto space-y-4">
+
+          {/* Original message */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <p className="text-xs text-slate-500 mb-2">Original message</p>
+            <p className="text-sm text-slate-200">{order.raw_message}</p>
+          </div>
+
+          {/* Items */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <p className="text-xs text-slate-500 mb-3">Items</p>
+            <div className="space-y-2">
+              {order.items?.map((item, i) => (
+                <div key={i} className="flex items-start justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-white">{item.name}</p>
+                    <p className="text-xs text-slate-400">
+                      {item.qty} {item.unit}
+                      {item.customisation && ` — ${item.customisation}`}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+            {order.delivery_date && (
+              <div className="mt-3 pt-3 border-t border-slate-800">
+                <p className="text-xs text-slate-500">
+                  📅 {new Date(order.delivery_date).toLocaleDateString('en-IN', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  })}
+                </p>
+              </div>
             )}
           </div>
-        ))}
-        {order.delivery_date && (
-          <p className="text-xs text-slate-500 mt-2">
-            📅 Delivery: {new Date(order.delivery_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}
-          </p>
-        )}
-      </div>
 
-      {/* Suggested reply */}
-      {order.suggested_reply && (
-        <div className="bg-slate-900 border border-yellow-500/20 rounded-lg p-4 mb-4">
-          <p className="text-xs text-yellow-500 mb-1">💡 Suggested reply</p>
-          <p className="text-slate-200 text-sm">{order.suggested_reply}</p>
-          <button
-            onClick={() => setReply(order.suggested_reply || '')}
-            className="text-xs text-yellow-500 mt-2 hover:text-yellow-300 transition"
-          >
-            Use this →
-          </button>
-        </div>
-      )}
-
-      {/* Status updater */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
-        <p className="text-xs text-slate-500 mb-2">Update status</p>
-        <div className="flex flex-wrap gap-2">
-          {STATUSES.map((s) => (
-            <button
-              key={s}
-              onClick={() => updateStatus(s)}
-              disabled={updating || order.status === s}
-              className={`text-xs px-3 py-1 rounded-full border transition ${
-                order.status === s
-                  ? 'border-white text-white bg-white/10'
-                  : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
-              }`}
-            >
-              {s.replace('_', ' ')}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Conversation */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4 mb-4">
-        <p className="text-xs text-slate-500 mb-3">Conversation</p>
-        <div className="space-y-2">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`text-sm p-2 rounded-lg max-w-xs ${
-                msg.direction === 'inbound'
-                  ? 'bg-slate-800 text-slate-200'
-                  : 'bg-blue-600/20 text-blue-200 ml-auto text-right'
-              }`}
-            >
-              {msg.body}
+          {/* Suggested reply */}
+          {order.suggested_reply && (
+            <div className="bg-slate-900 border border-yellow-500/30 rounded-xl p-4">
+              <p className="text-xs text-yellow-500 mb-2">💡 Suggested reply</p>
+              <p className="text-sm text-slate-200">{order.suggested_reply}</p>
+              <button
+                onClick={() => setReply(order.suggested_reply || '')}
+                className="text-xs text-yellow-500 mt-2 hover:text-yellow-300 transition"
+              >
+                Use this →
+              </button>
             </div>
-          ))}
-        </div>
-      </div>
+          )}
 
-      {/* Reply box */}
-      <div className="bg-slate-900 border border-slate-800 rounded-lg p-4">
-        <p className="text-xs text-slate-500 mb-2">Send reply</p>
-        <Textarea
-          value={reply}
-          onChange={(e) => setReply(e.target.value)}
-          placeholder="Type your reply..."
-          className="bg-slate-800 border-slate-700 text-white mb-2 resize-none"
-          rows={3}
-        />
-        <Button
-          onClick={sendReply}
-          disabled={sending || !reply.trim()}
-          className="bg-blue-600 hover:bg-blue-500 text-white"
-        >
-          {sending ? 'Sending...' : 'Send Reply'}
-        </Button>
+          {/* Status updater */}
+          <div className="bg-slate-900 border border-slate-800 rounded-xl p-4">
+            <p className="text-xs text-slate-500 mb-3">Update status</p>
+            <div className="flex flex-wrap gap-2">
+              {STATUSES.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => updateStatus(s)}
+                  disabled={updating || order.status === s}
+                  className={`text-xs px-3 py-1.5 rounded-full border transition ${
+                    order.status === s
+                      ? 'border-white text-white bg-white/10'
+                      : 'border-slate-700 text-slate-400 hover:border-slate-500 hover:text-slate-200'
+                  }`}
+                >
+                  {s.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT — Conversation + Reply */}
+        <div className="flex flex-col h-full">
+
+          {/* Conversation history */}
+          <div className="flex-1 p-6 overflow-y-auto space-y-3">
+            <p className="text-xs text-slate-500 mb-4">Conversation</p>
+            {messages.length === 0 ? (
+              <p className="text-xs text-slate-700">No messages yet</p>
+            ) : (
+              messages.map((msg) => (
+                <div
+                  key={msg.id}
+                  className={`flex ${msg.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div className={`max-w-xs text-sm px-4 py-2 rounded-2xl ${
+                    msg.direction === 'inbound'
+                      ? 'bg-slate-800 text-slate-200 rounded-tl-sm'
+                      : 'bg-blue-600 text-white rounded-tr-sm'
+                  }`}>
+                    {msg.body}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Reply box — pinned to bottom */}
+          <div className="border-t border-slate-800 p-4 bg-slate-950">
+            <Textarea
+              value={reply}
+              onChange={(e) => setReply(e.target.value)}
+              placeholder="Type your reply..."
+              className="bg-slate-900 border-slate-700 text-white mb-3 resize-none"
+              rows={3}
+            />
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-slate-600">
+                Reply will be saved to conversation history
+              </p>
+              <Button
+                onClick={sendReply}
+                disabled={sending || !reply.trim()}
+                className="bg-blue-600 hover:bg-blue-500 text-white text-sm"
+              >
+                {sending ? 'Sending...' : 'Send Reply'}
+              </Button>
+            </div>
+          </div>
+        </div>
       </div>
     </main>
   )

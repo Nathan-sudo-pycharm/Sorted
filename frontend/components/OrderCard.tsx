@@ -1,17 +1,15 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Order } from '@/lib/types'
 
 const statusColors: Record<string, string> = {
-  new: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-  confirmed: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
-  in_progress: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
-  ready: 'bg-green-500/10 text-green-400 border-green-500/20',
-  delivered: 'bg-slate-500/10 text-slate-400 border-slate-500/20',
-  cancelled: 'bg-red-500/10 text-red-400 border-red-500/20',
+  new: 'bg-blue-600 text-white',
+  confirmed: 'bg-slate-600 text-white',
+  in_progress: 'bg-orange-600 text-white',
+  ready: 'bg-green-600 text-white',
+  delivered: 'bg-slate-700 text-slate-300',
+  cancelled: 'bg-red-600 text-white',
 }
 
 const statusLabels: Record<string, string> = {
@@ -34,48 +32,60 @@ export default function OrderCard({ order }: Props) {
     ? new Date(order.delivery_date).toLocaleDateString('en-IN', {
         day: 'numeric',
         month: 'short',
+        year: 'numeric',
       })
-    : 'No date'
+    : null
+
+  const firstItem = order.items?.[0]
 
   return (
-    <Card
+    <div
       onClick={() => router.push(`/orders/${order.id}`)}
-      className="bg-slate-900 border-slate-800 hover:border-slate-600 transition-all duration-200 cursor-pointer"
+      className="bg-slate-900 border border-slate-800 hover:border-slate-600 rounded-xl p-4 cursor-pointer transition-all duration-200 hover:shadow-lg hover:shadow-slate-900/50"
     >
-      <CardHeader className="pb-2 pt-4 px-4">
-        <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500 font-mono">
-            +{order.customer_id.slice(0, 8)}...
-          </span>
-          <Badge
-            variant="outline"
-            className={`text-xs ${statusColors[order.status]}`}
-          >
-            {statusLabels[order.status]}
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="px-4 pb-4">
-        <div className="space-y-2">
-          {order.items?.map((item, i) => (
-            <div key={i} className="text-sm text-slate-200">
-              <span className="font-medium">{item.qty} {item.unit}</span>{' '}
-              <span>{item.name}</span>
-              {item.customisation && (
-                <span className="text-slate-500 text-xs ml-1">
-                  — {item.customisation}
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-        <div className="mt-3 flex items-center justify-between">
-          <span className="text-xs text-slate-500">📅 {formattedDate}</span>
-          {order.is_price_query && (
-            <span className="text-xs text-yellow-500">💬 Price query</span>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+      {/* Phone number */}
+      <p className="text-xs text-slate-500 mb-2 font-mono">
+        +{order.customer_id.slice(0, 12)}...
+      </p>
+
+      {/* Item name */}
+      {firstItem && (
+        <>
+          <p className="text-sm font-semibold text-white mb-1">
+            {firstItem.name}
+          </p>
+          <p className="text-xs text-slate-400 mb-3">
+            Qty: {firstItem.qty} {firstItem.unit}
+            {firstItem.customisation && ` — ${firstItem.customisation}`}
+          </p>
+        </>
+      )}
+
+      {/* Multiple items indicator */}
+      {order.items?.length > 1 && (
+        <p className="text-xs text-slate-500 mb-3">
+          +{order.items.length - 1} more item{order.items.length - 1 > 1 ? 's' : ''}
+        </p>
+      )}
+
+      {/* Delivery date */}
+      {formattedDate && (
+        <p className="text-xs text-slate-500 mb-3">
+          📅 {formattedDate}
+        </p>
+      )}
+
+      {/* Bottom row */}
+      <div className="flex items-center justify-between">
+        <span
+          className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[order.status]}`}
+        >
+          {statusLabels[order.status]}
+        </span>
+        {order.is_price_query && (
+          <span className="text-xs text-yellow-500">💬 Price query</span>
+        )}
+      </div>
+    </div>
   )
 }
