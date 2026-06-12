@@ -76,7 +76,7 @@ export default function OrderDetail() {
   }
 
   if (loading) return (
-    <main className="min-h-screen bg-slate-950 text-white p-6">
+    <main className="min-h-screen bg-slate-950 text-white p-6  font-sora">
       <Skeleton className="h-8 w-48 bg-slate-800 mb-4" />
       <div className="grid grid-cols-2 gap-6">
         <Skeleton className="h-96 bg-slate-800 rounded-xl" />

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase'
 import { Order, OrderStatus } from '@/lib/types'
 import KanbanColumn from '@/components/KanbanColumn'
 import StatsBar from '@/components/StatsBar'
+import { Spline_Sans_Mono } from 'next/font/google'
 
 const COLUMNS: { status: OrderStatus; label: string }[] = [
   { status: 'new', label: 'New' },
@@ -14,6 +15,12 @@ const COLUMNS: { status: OrderStatus; label: string }[] = [
   { status: 'ready', label: 'Ready' },
   { status: 'delivered', label: 'Delivered' },
 ]
+
+//Initializing the font (Specify subset and regular weight 400)
+const splineSansMono = Spline_Sans_Mono({ 
+  subsets: ['latin'],
+  weight: ['400', '700'] // Supports multiple weights if needed
+});
 
 export default function Home() {
   const router = useRouter()
@@ -60,10 +67,10 @@ export default function Home() {
       {/* Header */}
       <div className="border-b border-slate-800 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xl">🍰</span>
-            <h1 className="text-lg font-bold text-white  font-sora">Sorted</h1>
-          </div>
+           <div className={`flex items-center gap-2 ${splineSansMono.className}`}>
+      <span className="text-xl">🍰</span>
+      <h1 className="text-lg font-bold text-white">Sorted</h1>
+    </div>
           {/* Nav links */}
           <nav className="flex items-center gap-4">
             <button
