@@ -1,4 +1,4 @@
-# Sorted 🍰
+# Sorted 
 ### WhatsApp Order Manager for Home Bakers & Cloud Kitchens
 
 > *Before Sorted, orders are chaos. After, they're sorted.*
@@ -30,6 +30,21 @@ Sorted automatically extracts the order details, creates a structured record, se
 
 ---
 
+## Documentation
+
+| Doc | Description |
+|---|---|
+| [Architecture](./Documentation/ARCHITECTURE.md) | System design, data flow, technology decisions |
+| [Commands Reference](./Documentation/COMMANDS.md) | Every command used in this project, explained for beginners |
+| [Dev Log — Day 1 & 2](./Documentation/DevLog/Day1_and_2.md) | Webhook setup, Supabase integration |
+| [Dev Log — Day 3](./Documentation/DevLog/Day3.md) | Groq order parser, Next.js dashboard, Realtime |
+| [Dev Log — Day 4](./Documentation/DevLog/Day4.md) | Order detail page, status updates, reply system |
+| [Dev Log — Day 5](./Documentation/DevLog/Day5.md) | Menu manager, customer view, UI redesign, fonts |
+| [Dev Log — Day 6](./Documentation/DevLog/Day6.md) | Docker, migrations, README, v1.0 release |
+| [Parser Test Log](./Documentation/tests/Parser_test.md) | 6 test cases for the AI order parser |
+
+---
+
 ## Tech Stack
 
 | Layer | Technology | Status |
@@ -47,7 +62,27 @@ Sorted automatically extracts the order details, creates a structured record, se
 
 ---
 
-## Setup Guide
+## Quick Start
+
+### One-command setup (Docker)
+
+```bash
+git clone https://github.com/Nathan-sudo-pycharm/sorted.git
+cd sorted
+cp backend/.env.example backend/.env      # fill in your keys
+cp frontend/.env.local.example frontend/.env.local  # fill in your keys
+docker compose up --build
+```
+
+Open `http://localhost:3000` — dashboard is live.
+
+### Manual setup
+
+See the full manual setup guide below.
+
+---
+
+## Manual Setup Guide
 
 ### Prerequisites
 - Python 3.11+
@@ -70,31 +105,13 @@ python -m venv venv
 .\venv\Scripts\activate  # Windows
 source venv/bin/activate  # Mac/Linux
 pip install -r requirements.txt
-```
-
-Copy the env file and fill in your keys:
-
-```bash
-cp .env.example .env
-```
-
-```bash
-# backend/.env
-GROQ_API_KEY=your_groq_api_key
-SUPABASE_URL=https://yourproject.supabase.co
-SUPABASE_SERVICE_KEY=your_service_role_key
-VERIFY_TOKEN=any_random_string
-```
-
-Run the backend:
-```bash
+cp .env.example .env     # fill in your keys
 uvicorn main:app --reload
 ```
 
 ### 3. Database setup
 
-Go to your Supabase project → SQL Editor and run the migration file:
-
+Go to your Supabase project → SQL Editor and run:
 ```
 supabase/migrations/001_initial.sql
 ```
@@ -104,22 +121,7 @@ supabase/migrations/001_initial.sql
 ```bash
 cd frontend
 npm install
-```
-
-Copy the env file:
-```bash
-cp .env.local.example .env.local
-```
-
-```bash
-# frontend/.env.local
-NEXT_PUBLIC_SUPABASE_URL=https://yourproject.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_publishable_key
-NEXT_PUBLIC_API_URL=http://localhost:8000
-```
-
-Run the frontend:
-```bash
+cp .env.local.example .env.local  # fill in your keys
 npm run dev
 ```
 
@@ -131,7 +133,7 @@ http://localhost:3000
 
 ### 6. Test with a mock message
 
-Send a POST request to `http://localhost:8000/webhook` with this body:
+Send a POST request to `http://localhost:8000/webhook`:
 
 ```json
 {
@@ -156,32 +158,24 @@ The order will appear on your dashboard instantly.
 
 ---
 
-## One-command setup (Docker)
-
-```bash
-git clone https://github.com/Nathan-sudo-pycharm/sorted.git
-cd sorted
-cp backend/.env.example backend/.env  # fill in your keys
-docker-compose up
-```
-
----
-
 ## Project Structure
 
 ```
 sorted/
 ├── backend/
-│   ├── db/              # Supabase client
-│   ├── services/        # Order parser (Groq)
-│   ├── main.py          # FastAPI app + all endpoints
-│   └── requirements.txt
+│   ├── db/                    # Supabase client
+│   ├── services/              # Groq order parser
+│   ├── main.py                # FastAPI app + all endpoints
+│   ├── .env.example           # Environment variable template
+│   └── requirements.txt       # Python dependencies
 ├── frontend/
-│   ├── app/             # Next.js pages
-│   ├── components/      # UI components
-│   └── lib/             # Supabase client, types
+│   ├── app/                   # Next.js pages
+│   ├── components/            # UI components
+│   ├── lib/                   # Supabase client, types, utils
+│   └── .env.local.example     # Frontend env template
 ├── supabase/
-│   └── migrations/      # SQL migration files
+│   └── migrations/            # SQL migration files
+├── Documentation/             # All project docs and devlogs
 ├── docker-compose.yml
 └── README.md
 ```
@@ -192,21 +186,26 @@ sorted/
 
 | Feature | Status |
 |---|---|
-| AI order parsing | ✅ Done |
-| Live Kanban dashboard | ✅ Done |
-| Order detail + reply | ✅ Done |
-| Menu manager | ✅ Done |
-| Customer profiles | ✅ Done |
+| AI order parsing | ✅ v1.0 |
+| Live Kanban dashboard | ✅ v1.0 |
+| Order detail + reply | ✅ v1.0 |
+| Menu manager | ✅ v1.0 |
+| Customer profiles | ✅ v1.0 |
+| Docker one-command setup | ✅ v1.0 |
+| WhatsApp Cloud API integration | 🚧 v1.1 |
+| Payment tracking (Razorpay) | 🚧 v1.2 |
+| Follow-up queue | 🚧 v1.2 |
+| Mobile app | 🚧 Future |
 
 ---
 
 ## Contributing
 
 Contributions are welcome! Ideas for community contributions:
+- WhatsApp Cloud API integration
 - Language prompt packs (Tamil, Telugu, Hindi regions)
 - Menu templates for bakeries, tiffin services, mithai shops
-- WhatsApp Cloud API integration
-- Payment integrations
+- Payment integrations (Razorpay, UPI)
 
 ---
 
@@ -216,4 +215,4 @@ MIT — free to use, modify, and self-host.
 
 ---
 
-*Built by [Nathan Sequeira](https://github.com/Nathan-sudo-pycharm) · Mangalore, India · 2026*
+*Built by [Nathan Sequeira](https://github.com/Nathan-sudo-pycharm) · Manglore, India · 2026*
