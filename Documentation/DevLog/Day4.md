@@ -139,15 +139,6 @@ sorted/
 - Reply saves to messages table as outbound and appears in conversation ✅
 - CORS configured so frontend and backend talk correctly ✅
 
-## What's Next
-
-**Week 5 — Menu Manager + Customer View**
-- Baker sets up menu items with names, aliases, prices
-- Customer list showing all customers with order count and last order date
-- Per-customer notes (allergies, preferences)
-- Full order history per customer
-
----
 
 ## Key Lessons
 
